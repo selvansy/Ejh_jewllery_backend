@@ -190,7 +190,7 @@ class ProductRepository {
             id_branch: 1,
             categoryName: "$category.category_name",
             pathurl: {
-              $concat: ["$s3Details.s3display_url", `${config.AWS_LOCAL_PATH}/products/`]
+              $concat: ["$s3Details.s3display_url", `${config.AWS_LOCAL_PATH}products/`]
             },
             isWishlisted: 1,
             purityRate: 1,
@@ -220,6 +220,7 @@ class ProductRepository {
         return null;
       }
     } catch (err) {
+      console.error(err)
       throw new Error("Database error occurred while editing Product");
     }
   }
@@ -409,7 +410,7 @@ class ProductRepository {
             pathurl: {
               $concat: [
                 "$s3Details.s3display_url",
-                `${config.AWS_LOCAL_PATH}/products/`,
+                `${config.AWS_LOCAL_PATH}products/`,
               ],
             },
           },

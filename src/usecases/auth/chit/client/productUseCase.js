@@ -137,8 +137,44 @@ class ProductUseCase {
     }
   }
 
+   sanitizeProductData(data) {
+  if (data.makingCharges) {
+    if (
+      data.makingCharges.actualValue === null ||
+      data.makingCharges.actualValue === undefined ||
+      data.makingCharges.actualValue === "" ||
+      data.makingCharges.actualValue === "null"
+    ) {
+      data.makingCharges.actualValue = 0;
+      data.makingCharges.discountedValue =0
+      data.makingCharges.discountedPercentage= 0
+    } else {
+      data.makingCharges.actualValue = Number(data.makingCharges.actualValue);
+    }
+  }
+
+  if (data.wastageCharges) {
+    if (
+      data.wastageCharges.actualValue === null ||
+      data.wastageCharges.actualValue === undefined ||
+      data.wastageCharges.actualValue === "" ||
+      data.wastageCharges.actualValue === "null"
+    ) {
+      data.wastageCharges.actualValue = 0;
+       data.wastageCharges.discountedValue =0
+       data.wastageCharges.discountedPercentage= 0
+    } else {
+      data.wastageCharges.actualValue = Number(data.wastageCharges.actualValue);
+    }
+  }
+
+  return data;
+}
+
+
   async editProduct(id, productData, images) {
     try {
+      productData = this.sanitizeProductData(productData);
       const idValidation = this.validateObjectId(id, "Product");
       if (idValidation) return idValidation;
   
@@ -167,23 +203,64 @@ class ProductUseCase {
   
       const updateFields = {};
   
+      // for (let key in productData) {
+      //   if (key === "showprice" || key === "sell") {
+      //     const newValue =
+      //       productData[key] === "true" || productData[key] === true;
+      //     updateFields[key] = newValue;
+      //   } else if (
+      //     key === "modified_by" ||
+      //     key === "id_branch" ||
+      //     key === "id_metal" ||
+      //     key === "id_purity" ||
+      //     key === "id_category"
+      //   ) {
+      //     updateFields[key] = productData[key];
+      //   } else if (productData[key] !== undefined) {
+      //     updateFields[key] = productData[key];
+      //   }
+      //   else if(key == "makingCharges" ){
+      //     if(!productData[key].actualValue){
+      //      updateFields[key].actualValue = 0
+      //     }
+      //   }
+      //   else if(key == "wastageCharges" ){
+      //     if(!productData[key].actualValue){
+      //      updateFields[key].actualValue = 0
+      //     }
+      //   }
+      // }
       for (let key in productData) {
-        if (key === "showprice" || key === "sell") {
-          const newValue =
-            productData[key] === "true" || productData[key] === true;
-          updateFields[key] = newValue;
-        } else if (
-          key === "modified_by" ||
-          key === "id_branch" ||
-          key === "id_metal" ||
-          key === "id_purity" ||
-          key === "id_category"
-        ) {
-          updateFields[key] = productData[key];
-        } else if (productData[key] !== undefined) {
-          updateFields[key] = productData[key];
-        }
-      }
+  if (key === "showprice" || key === "sell") {
+    updateFields[key] =
+      productData[key] === "true" || productData[key] === true;
+  } 
+  else if (
+    key === "modified_by" ||
+    key === "id_branch" ||
+    key === "id_metal" ||
+    key === "id_purity" ||
+    key === "id_category"
+  ) {
+    updateFields[key] = productData[key];
+  } 
+  else if (key === "makingCharges" || key === "wastageCharges") {
+    updateFields[key] = {
+      ...productData[key],
+      actualValue:
+        productData[key].actualValue === null ||
+        productData[key].actualValue === undefined ||
+        productData[key].actualValue === "" ||
+        productData[key].actualValue === "null"
+          ? 0
+          : Number(productData[key].actualValue),
+    };
+  }
+  else if (productData[key] !== undefined) {
+    updateFields[key] = productData[key];
+  }
+}
+
   
       if (
         updateFields.id_metal ||
@@ -240,11 +317,13 @@ class ProductUseCase {
           ...uploadedImages,
         ];
       }
-  
+
+
       const updateProduct = await this.productRepository.editProduct(
         productData,
         id
       );
+    
       if (updateProduct) {
         return { success: true, message: "Product edited successfully" };
       }
