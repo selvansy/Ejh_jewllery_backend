@@ -1,4 +1,4 @@
-import config from "../../../../config/chit/env";
+import config from "../../../../config/chit/env.js";
 
 class OrganisationUsecase {
     constructor(organisationRepo,s3Service,s3Repo){

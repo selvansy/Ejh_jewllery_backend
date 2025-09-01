@@ -1,5 +1,5 @@
 import { isValidObjectId } from "mongoose";
-import config from "../../../../config/chit/env";
+import config from "../../../../config/chit/env.js";
 
 class SchemeUseCase {
   constructor(
